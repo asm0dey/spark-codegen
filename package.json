@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "start": "mdx-deck deck.mdx",
-    "build": "mdx-deck build deck.mdx",
-    "build-base": "mdx-deck build deck.mdx",
-    "ccc": "sed -i.bak 's|<head>|<head><base href=/spark-codegen>|' public/index.html",
-    "test": "echo \"there are no tests\""
+    "build": "mdx-deck build deck.mdx"
   },
   "devDependencies": {
+    "@mdx-deck/gatsby-plugin": "^4.1.1",
     "code-surfer": "3.1.1",
     "mdx-deck": "3.0.10"
   },
