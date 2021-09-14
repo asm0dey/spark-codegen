@@ -706,4 +706,175 @@ final class GeneratedIteratorForCodegenStage1 extends BufferedRowIterator {
 
 </CodeSurfer>
 
+---
+
+# Всё ещё непонятно
+
+- Код генерируется
+- Цикл бегает
+- Что-то кудато добавляется
+
+---
+
+<CodeSurfer>
+
+```kotlin
+    withSpark(
+        master = "local[4]",
+    ) {
+        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
+            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
+            .map { it.second - 1 to it.first }
+            .sort { arrayOf(it.col("first").desc()) }
+            .debugCodegen()
+            .show()
+    }
+```
+
+```kotlin
+    withSpark(
+        master = "local[4]",
+        props = mapOf("spark.sql.codegen.comments" to true)
+    ) {
+        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
+            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
+            .map { it.second - 1 to it.first }
+            .sort { arrayOf(it.col("first").desc()) }
+            .debugCodegen()
+            .show()
+    }
+```
+
+```java file=./2.java
+```
+
+```java 150:156 file=./2.java
+```
+
+```java 156 file=./2.java
+```
+
+```java 155 file=./2.java
+```
+
+```java 153:154 file=./2.java
+```
+
+```java 150:152 file=./2.java
+```
+
+```java 160:162 file=./2.java
+```
+
+```java 163:164 file=./2.java
+```
+
+```java 166 file=./2.java
+```
+
+```java 62:67 file=./2.java
+```
+
+```java 68:80 file=./2.java
+```
+
+```java 82:89 file=./2.java
+```
+
+```java 91:92 file=./2.java
+```
+
+```java 94 file=./2.java
+```
+
+```java 29:32 file=./2.java
+```
+
+```java 28[41:67],36 file=./2.java
+```
+
+```java 36,43,44 file=./2.java
+```
+
+```java 50,58 file=./2.java
+```
+
+```java 100 file=./2.java
+```
+
+```java 98[49:83],101,111,112 file=./2.java
+```
+
+```java 116,117,127,128 file=./2.java
+```
+
+```java 134:137 file=./2.java
+```
+
+```java 136,144 file=./2.java
+```
+
+```java
+  public static void copyMemory(
+    Object src, long srcOffset, Object dst, long dstOffset, long length) {
+    // Check if dstOffset is before or after srcOffset to determine if we should copy
+    // forward or backwards. This is necessary in case src and dst overlap.
+    if (dstOffset < srcOffset) {
+      while (length > 0) {
+        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
+        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
+        length -= size;
+        srcOffset += size;
+        dstOffset += size;
+      }
+    } else {
+      srcOffset += length;
+      dstOffset += length;
+      while (length > 0) {
+        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
+        srcOffset -= size;
+        dstOffset -= size;
+        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
+        length -= size;
+      }
+
+    }
+  }
+```
+
+```java 8
+  public static void copyMemory(
+    Object src, long srcOffset, Object dst, long dstOffset, long length) {
+    // Check if dstOffset is before or after srcOffset to determine if we should copy
+    // forward or backwards. This is necessary in case src and dst overlap.
+    if (dstOffset < srcOffset) {
+      while (length > 0) {
+        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
+        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
+        length -= size;
+        srcOffset += size;
+        dstOffset += size;
+      }
+    } else {
+      srcOffset += length;
+      dstOffset += length;
+      while (length > 0) {
+        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
+        srcOffset -= size;
+        dstOffset -= size;
+        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
+        length -= size;
+      }
+
+    }
+  }
+```
+
+</CodeSurfer>
+
+---
+
+# Почему мы закончили на `_UNSAFE`?
+
+Потому что впереди ещё сортировка!
 
