@@ -4,6 +4,8 @@
   "scripts": {
     "start": "mdx-deck deck.mdx",
     "build": "mdx-deck build deck.mdx",
+    "build-base": "mdx-deck build deck.mdx",
+    "ccc": "sed -i.bak 's|<head>|<head><base href=/spark-codegen>|' public/index.html",
     "test": "echo \"there are no tests\""
   },
   "devDependencies": {
