@@ -3,10 +3,11 @@ import {
   CodeSurferColumns,
   Step,
 } from "code-surfer";
-import { github, vsDark } from "@code-surfer/themes";
+import { dracula } from "@code-surfer/themes"
 import "prismjs/components/prism-kotlin"
 import "prismjs/components/prism-java"
-export const theme = vsDark;
+import { SplitRight } from 'mdx-deck'
+export const theme = dracula;
 
 # Spark Magic:
 ## How High-level Pipelines Become Distributed Hardcore
@@ -16,7 +17,13 @@ Pasha Finkelshteyn, JetBrains
 
 ---
 
-# Wazzup!! :money:
+<SplitRight>
+
+# Hi
+
+# I'm Pasha
+
+</SplitRight>
 
 ---
 
@@ -842,7 +849,7 @@ final class GeneratedIteratorForCodegenStage1 extends BufferedRowIterator {
   }
 ```
 
-```java 8
+```java 8 title="sun.misc.Unsafe O_o"
   public static void copyMemory(
     Object src, long srcOffset, Object dst, long dstOffset, long length) {
     // Check if dstOffset is before or after srcOffset to determine if we should copy
@@ -876,5 +883,539 @@ final class GeneratedIteratorForCodegenStage1 extends BufferedRowIterator {
 
 # Почему мы закончили на `_UNSAFE`?
 
-Потому что впереди ещё сортировка!
+Потому что впереди ещё сортировка
 
+---
+
+# Почему мы закончили на `_UNSAFE`?
+
+Потому что впереди ещё сортировка
+
+Но я вам её не покажу
+
+Пора понять как мы к этим сгенерированным исходникам приходим
+
+---
+
+<CodeSurfer>
+
+```kotlin
+dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
+    "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
+    .map { it.second - 1 to it.first }
+    .sort { arrayOf(it.col("first").desc()) }
+    .debugCodegen()
+    .show()
+```
+
+```kotlin 1[1:4]
+dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
+    "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
+    .map { it.second - 1 to it.first }
+    .sort { arrayOf(it.col("first").desc()) }
+    .debugCodegen()
+    .show()
+```
+
+```kotlin
+inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
+    createDataset(listOf(*t), encoder<T>())
+```
+
+```kotlin 2[31:42]
+inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
+    createDataset(listOf(*t), encoder<T>())
+```
+
+```kotlin
+@OptIn(ExperimentalStdlibApi::class)
+inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::class)
+```
+
+```kotlin 1,2[64:74] subtitle="Аналог ParametryzedTypeReferense в compile-time"
+@OptIn(ExperimentalStdlibApi::class)
+inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::class)
+```
+
+```kotlin 2[48:85] subtitle="encoder → generateEncoder"
+@OptIn(ExperimentalStdlibApi::class)
+inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::class)
+```
+
+```kotlin 4[53:72]
+fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
+    @Suppress("UNCHECKED_CAST")
+    return when {
+        isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
+        else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
+    } as Encoder<T>
+}
+```
+
+```kotlin title="Мемоизация на коленке"
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin title="Мемоизация на коленке" subtitle="Мне сказали что это сложно, так что давайте разбираться"
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 1:5
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 1[16:26] subtitle="Java PECS → Kotlin PICO"
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 1[48:55]
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 1[29:43]
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 2
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 3[18:29]
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 3,4
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 4[16:36]
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 1[29:43],3[25:28],4[28:35]
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 7
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 9 subtitle="Поле функционального типа (T) -> R"
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 9[44:52] subtitle="schema?"
+class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+    private val values = ConcurrentHashMap<T, R>()
+    override fun invoke(x: T) =
+        values.getOrPut(x, { f(x) })
+}
+
+private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
+
+private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```
+
+```kotlin 2 file=./schema.kt
+```
+
+```kotlin 2[25:57] file=./schema.kt subtitle="Pair<A, B> → Pair<String, Int>"
+```
+
+```kotlin 2[61:68] file=./schema.kt subtitle="Pair<A, B> → Pair<String, Int>"
+```
+
+```kotlin 3:6 file=./schema.kt
+```
+
+```kotlin
+private val knownDataTypes = mapOf(
+    Byte::class to DataTypes.ByteType,
+    Short::class to DataTypes.ShortType,
+    Int::class to DataTypes.IntegerType,
+    Long::class to DataTypes.LongType,
+    Boolean::class to DataTypes.BooleanType,
+    Float::class to DataTypes.FloatType,
+    Double::class to DataTypes.DoubleType,
+    String::class to DataTypes.StringType,
+    LocalDate::class to `DateType$`.`MODULE$`,
+    Date::class to `DateType$`.`MODULE$`,
+    Timestamp::class to `TimestampType$`.`MODULE$`,
+    Instant::class to `TimestampType$`.`MODULE$`
+)
+```
+
+
+```kotlin 7 file=./schema.kt
+```
+
+```kotlin 9 file=./schema.kt
+```
+
+```kotlin 11[38:67] file=./schema.kt subtitle="List<Pair<KTypeParameter, KTypeProjection>>"
+```
+
+```kotlin 12 file=./schema.kt subtitle="\"A\" to String"
+```
+
+```kotlin 2[25:57],11:13 file=./schema.kt subtitle="Merge types with previous iteration"
+```
+
+```kotlin 15:17 file=./schema.kt
+```
+
+```kotlin 18:36 file=./schema.kt
+```
+
+```kotlin 19[17:25] file=./schema.kt
+```
+
+```kotlin 19[29:53],20:29 file=./schema.kt
+```
+
+```kotlin 30[15:63] file=./schema.kt
+```
+
+```kotlin 31:35 file=./schema.kt
+```
+
+```kotlin 37:49 file=./schema.kt
+```
+
+```kotlin 50:74 file=./schema.kt
+```
+
+```kotlin 52:53 file=./schema.kt
+```
+
+```kotlin 54:55 file=./schema.kt
+```
+
+```kotlin 57 file=./schema.kt
+```
+
+```kotlin 58:64 file=./schema.kt
+```
+
+```kotlin 66:69 file=./schema.kt
+```
+
+```kotlin 65:69 file=./schema.kt
+```
+
+```kotlin 73 file=./schema.kt
+```
+
+```kotlin 75:94 file=./schema.kt
+```
+
+```scala file=./helpers.scala title="Стройная система костылей"
+```
+
+```kotlin 2[61:68] file=./schema.kt
+```
+
+```kotlin
+fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
+    @Suppress("UNCHECKED_CAST")
+    return when {
+        isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
+        else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
+    } as Encoder<T>
+}
+```
+
+```kotlin 4[34:78]
+fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
+    @Suppress("UNCHECKED_CAST")
+    return when {
+        isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
+        else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
+    } as Encoder<T>
+}
+```
+
+```kotlin
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+    return ExpressionEncoder(
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.serializerFor(kClass.java, schema)
+        else
+            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.deserializerFor(kClass.java, schema) 
+        else 
+            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
+    )
+}
+```
+
+```kotlin 2
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+    return ExpressionEncoder(
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.serializerFor(kClass.java, schema)
+        else
+            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.deserializerFor(kClass.java, schema) 
+        else 
+            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
+    )
+}
+```
+
+```kotlin 3,4
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+    return ExpressionEncoder(
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.serializerFor(kClass.java, schema)
+        else
+            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.deserializerFor(kClass.java, schema) 
+        else 
+            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
+    )
+}
+```
+
+```kotlin 5,6
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+    return ExpressionEncoder(
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.serializerFor(kClass.java, schema)
+        else
+            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.deserializerFor(kClass.java, schema) 
+        else 
+            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
+    )
+}
+```
+
+```kotlin 7:10
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+    return ExpressionEncoder(
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.serializerFor(kClass.java, schema)
+        else
+            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.deserializerFor(kClass.java, schema) 
+        else 
+            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
+    )
+}
+```
+
+```kotlin 11
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+    return ExpressionEncoder(
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.serializerFor(kClass.java, schema)
+        else
+            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.deserializerFor(kClass.java, schema) 
+        else 
+            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
+    )
+}
+```
+
+```kotlin 2[12:28]
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+    return ExpressionEncoder(
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.serializerFor(kClass.java, schema)
+        else
+            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) 
+            KotlinReflection.deserializerFor(kClass.java, schema) 
+        else 
+            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
+    )
+}
+```
+
+```scala file=./serializerFor.scala
+```
+
+```scala 1 file=./serializerFor.scala
+```
+
+```scala 1[68:77] file=./serializerFor.scala subtitle="It's called expression, but really it may be the giant code block"
+```
+
+```scala title="The most important method"
+  /**
+   * Returns an [[ExprCode]], that contains the Java source code to generate the result of
+   * evaluating the expression on an input row.
+   *
+   * @param ctx a [[CodegenContext]]
+   * @return [[ExprCode]]
+   */
+  def genCode(ctx: CodegenContext): ExprCode = {
+      // ommited
+  }
+```
+
+```scala 2 file=./serializerFor.scala subtitle="Obtain Scala type from Java class"
+```
+
+```scala 3 file=./serializerFor.scala subtitle="Obtain class name"
+```
+
+```scala 4 file=./serializerFor.scala subtitle="Walked typed path is used for exceptions to determine what's going wrong"
+```
+
+```scala 6 file=./serializerFor.scala subtitle="Calling recursive serializer creation"
+```
+
+```scala 6[53:75] file=./serializerFor.scala subtitle="Supplying our predefined schema"
+```
+
+```scala file=./serializerFor2.scala subtitle="316-line-height"
+```
+
+```scala 1:7 file=./serializerFor2.scala
+```
+
+```scala 58:59 file=./serializerFor2.scala subtitle="simple input object"
+```
+
+```scala 111:112 file=./serializerFor2.scala subtitle="string"
+```
+
+```scala
+def createSerializerForString(inputObject: Expression): Expression = {
+    StaticInvoke(
+        classOf[UTF8String],
+        StringType,
+        "fromString",
+        inputObject :: Nil,
+        returnNullable = false)
+}
+```
+
+```scala 113:118 file=./serializerFor2.scala subtitle="string"
+```
+
+</CodeSurfer>
+
+---
+
+# The End
