@@ -3,11 +3,18 @@ import {
   CodeSurferColumns,
   Step,
 } from "code-surfer";
-import { dracula } from "@code-surfer/themes"
+import { vsDark } from "@code-surfer/themes"
 import "prismjs/components/prism-kotlin"
 import "prismjs/components/prism-java"
-import { SplitRight } from 'mdx-deck'
-export const theme = dracula;
+import "prismjs/components/prism-scala"
+
+export const theme = (()=>{
+    vsDark.styles.CodeSurfer.code = {
+        fontFamily: "'JetBrains Mono', Menlo, monospace",
+    }
+    return vsDark
+})();
+
 
 # Spark Magic:
 ## How High-level Pipelines Become Distributed Hardcore
@@ -17,127 +24,48 @@ Pasha Finkelshteyn, JetBrains
 
 ---
 
-<SplitRight>
-
 # Hi
 
-# I'm Pasha
+## I'm Pasha
 
-</SplitRight>
 
 ---
 
+
+<CodeSurfer >
+
+```kotlin file=./snippets/complex.kt title="Complex example"
+```
+</CodeSurfer>
+
+---
+
+
 <CodeSurfer>
 
-```kotlin 
-data class Q<T>(val id: Int, val text: T)
-object Main {
-    @JvmStatic
-    fun main(args: Array<String>) {
-
-        val spark = SparkSession
-            .builder()
-            .master("local[2]")
-            .appName("Simple Application").orCreate
-
-        val triples = spark
-            .toDS(listOf(Q(1, 1 to null), Q(2, 2 to "22"), Q(3, 3 to "333")))
-            .map { (a, b) -> a + b.first to b.second?.length }
-            .map { it to 1 }
-            .map { (a, b) -> Triple(a.first, a.second, b) }
-
-
-        val pairs = spark
-            .toDS(listOf(2 to "hell", 4 to "moon", 6 to "berry"))
-
-        triples
-            .leftJoin(pairs, triples.col("first").multiply(2).eq(pairs.col("first")))
-            .map { (triple, pair) -> Five(triple.first, triple.second, triple.third, pair?.first, pair?.second) }
-            .groupByKey { it.a }
-            .reduceGroupsK { v1, v2 -> v1.copy(a = v1.a + v2.a, b = v1.a + v2.a) }
-            .map { it.second }
-            .repartition(1)
-            .withCached {
-                write()
-                    .also { it.csv("csvpath") }
-                    .also { it.orc("orcpath") }
-                showDS()
-            }
-
-
-
-        spark.stop()
-    }
-
-    data class Five<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
-}
+```kotlin file=./snippets/simple.kt  title="SimpleExample"
 ```
 
-```kotlin
-fun main() {
-    withSpark {
-        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sort { arrayOf(it.col("first").desc()) }
-            .show()
-    }
-}
+```diff 2
 ```
 
-```kotlin
-    withSpark {
-        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sort { arrayOf(it.col("first").desc()) }
-            .show()
-    }
+```diff 3:4
 ```
 
-```kotlin 1
-    withSpark {
-        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sort { arrayOf(it.col("first").desc()) }
-            .show()
-    }
+```diff 5
 ```
 
-```kotlin 1:2
-        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sort { arrayOf(it.col("first").desc()) }
-            .show()
+```diff 6
 ```
 
-```kotlin 3
-        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sort { arrayOf(it.col("first").desc()) }
-            .show()
+```diff 7
 ```
 
-```kotlin 4
-        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sort { arrayOf(it.col("first").desc()) }
-            .show()
-```
+</CodeSurfer>
 
-```kotlin 5
-        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sort { arrayOf(it.col("first").desc()) }
-            .show()
-```
+---
 
-```sql
+```
 +-----+------+
 |first|second|
 +-----+------+
@@ -157,578 +85,20 @@ fun main() {
 +-----+------+
 ```
 
-```kotlin
-        listOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-            .map { it.second - 1 to it.first }
-            .sortedByDescending { it.first }
-            .forEach {
-               println("first: ${it.first}, second: ${it.second}") }
-```
-
-```kotlin 1:6
-withSpark {
-    dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-        "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-        .map { it.second - 1 to it.first }
-        .sort { arrayOf(it.col("first").desc()) }
-        .show()
-}
-```
-
-```kotlin 1[10:30]
-withSpark(master = "local[4]") {
-    dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-        "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-        .map { it.second - 1 to it.first }
-        .sort { arrayOf(it.col("first").desc()) }
-        .show()
-}
-```
-
-</CodeSurfer>
-
 ---
 
-# Очень интересно и совсем непонятно!
+# Interseting, but…
 
 ---
 
 <CodeSurfer>
 
-```kotlin
-dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-    "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-    .map { it.second - 1 to it.first }
-    .sort { arrayOf(it.col("first").desc()) }
-    .show()
+```kotlin file=./snippets/simple.kt  title="SimpleExample"
 ```
 
 ```kotlin
-dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-    "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-    .map { it.second - 1 to it.first }
-    .sort { arrayOf(it.col("first").desc()) }
-    .debugCodegen()
-    .show()
-```
-
-</CodeSurfer>
-
----
-
-<CodeSurfer>
-
-```java
-/* 001 */ public Object generate(Object[] references) {
-/* 002 */   return new GeneratedIteratorForCodegenStage1(references);
-/* 003 */ }
-/* 004 */
-/* 005 */ // codegenStageId=1
-/* 006 */ final class GeneratedIteratorForCodegenStage1 extends org.apache.spark.sql.execution.BufferedRowIterator {
-/* 007 */   private Object[] references;
-/* 008 */   private scala.collection.Iterator[] inputs;
-/* 009 */   private scala.collection.Iterator localtablescan_input_0;
-/* 010 */   private int deserializetoobject_argValue_0;
-/* 011 */   private java.lang.String[] deserializetoobject_mutableStateArray_0 = new java.lang.String[2];
-/* 012 */   private org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter[] deserializetoobject_mutableStateArray_2 = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter[5];
-/* 013 */   private java.lang.Integer[] deserializetoobject_mutableStateArray_1 = new java.lang.Integer[1];
-/* 014 */   private kotlin.Pair[] mapelements_mutableStateArray_0 = new kotlin.Pair[1];
-/* 015 */
-/* 016 */   public GeneratedIteratorForCodegenStage1(Object[] references) {
-/* 017 */     this.references = references;
-/* 018 */   }
-/* 019 */
-/* 020 */   public void init(int index, scala.collection.Iterator[] inputs) {
-/* 021 */     partitionIndex = index;
-/* 022 */     this.inputs = inputs;
-/* 023 */     localtablescan_input_0 = inputs[0];
-/* 024 */
-/* 025 */     deserializetoobject_mutableStateArray_2[0] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(1, 32);
-/* 026 */     deserializetoobject_mutableStateArray_2[1] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(1, 32);
-/* 027 */     deserializetoobject_mutableStateArray_2[2] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(1, 32);
-/* 028 */     deserializetoobject_mutableStateArray_2[3] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(1, 32);
-/* 029 */     deserializetoobject_mutableStateArray_2[4] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(2, 32);
-/* 030 */
-/* 031 */   }
-/* 032 */
-/* 033 */   private void mapelements_doConsume_0(kotlin.Pair mapelements_expr_0_0, boolean mapelements_exprIsNull_0_0) throws java.io.IOException {
-/* 034 */     boolean mapelements_isNull_1 = true;
-/* 035 */     kotlin.Pair mapelements_value_1 = null;
-/* 036 */     if (!false) {
-/* 037 */       mapelements_mutableStateArray_0[0] = mapelements_expr_0_0;
-/* 038 */
-/* 039 */       mapelements_isNull_1 = false;
-/* 040 */       if (!mapelements_isNull_1) {
-/* 041 */         Object mapelements_funcResult_0 = null;
-/* 042 */
-/* 043 */         try {
-/* 044 */           mapelements_funcResult_0 = ((org.apache.spark.api.java.function.MapFunction) references[1] /* literal */).call(mapelements_mutableStateArray_0[0]);
-/* 045 */         } catch (Exception e) {
-/* 046 */           org.apache.spark.unsafe.Platform.throwException(e);
-/* 047 */         }
-/* 048 */
-/* 049 */         if (mapelements_funcResult_0 != null) {
-/* 050 */           mapelements_value_1 = (kotlin.Pair) mapelements_funcResult_0;
-/* 051 */         } else {
-/* 052 */           mapelements_isNull_1 = true;
-/* 053 */         }
-/* 054 */
-/* 055 */       }
-/* 056 */     }
-/* 057 */
-/* 058 */     serializefromobject_doConsume_0(mapelements_value_1, mapelements_isNull_1);
-/* 059 */
-/* 060 */   }
-/* 061 */
-/* 062 */   private void deserializetoobject_doConsume_0(InternalRow localtablescan_row_0, UTF8String deserializetoobject_expr_0_0, int deserializetoobject_expr_1_0) throws java.io.IOException {
-/* 063 */     boolean deserializetoobject_isNull_1 = true;
-/* 064 */     java.lang.String deserializetoobject_value_1 = null;
-/* 065 */     if (!false) {
-/* 066 */       deserializetoobject_isNull_1 = false;
-/* 067 */       if (!deserializetoobject_isNull_1) {
-/* 068 */         Object deserializetoobject_funcResult_0 = null;
-/* 069 */         deserializetoobject_funcResult_0 = deserializetoobject_expr_0_0.toString();
-/* 070 */         deserializetoobject_value_1 = (java.lang.String) deserializetoobject_funcResult_0;
-/* 071 */
-/* 072 */       }
-/* 073 */     }
-/* 074 */     deserializetoobject_mutableStateArray_0[0] = deserializetoobject_value_1;
-/* 075 */
-/* 076 */     deserializetoobject_argValue_0 = deserializetoobject_expr_1_0;
-/* 077 */
-/* 078 */     java.lang.Integer deserializetoobject_value_3 = null;
-/* 079 */     if (!false) {
-/* 080 */       deserializetoobject_value_3 = java.lang.Integer.valueOf(deserializetoobject_argValue_0);
-/* 081 */     }
-/* 082 */     deserializetoobject_mutableStateArray_1[0] = deserializetoobject_value_3;
-/* 083 */
-/* 084 */     final kotlin.Pair deserializetoobject_value_0 = false ?
-/* 085 */     null : new kotlin.Pair(deserializetoobject_mutableStateArray_0[0], deserializetoobject_mutableStateArray_1[0]);
-/* 086 */
-/* 087 */     mapelements_doConsume_0(deserializetoobject_value_0, false);
-/* 088 */
-/* 089 */   }
-/* 090 */
-/* 091 */   private void serializefromobject_doConsume_0(kotlin.Pair serializefromobject_expr_0_0, boolean serializefromobject_exprIsNull_0_0) throws java.io.IOException {
-/* 092 */     if (serializefromobject_exprIsNull_0_0) {
-/* 093 */       throw new NullPointerException(((java.lang.String) references[2] /* errMsg */));
-/* 094 */     }
-/* 095 */     boolean serializefromobject_isNull_1 = true;
-/* 096 */     int serializefromobject_value_1 = -1;
-/* 097 */     if (!false) {
-/* 098 */       serializefromobject_isNull_1 = false;
-/* 099 */       if (!serializefromobject_isNull_1) {
-/* 100 */         Object serializefromobject_funcResult_0 = null;
-/* 101 */         serializefromobject_funcResult_0 = serializefromobject_expr_0_0.getFirst();
-/* 102 */         serializefromobject_value_1 = (Integer) serializefromobject_funcResult_0;
-/* 103 */
-/* 104 */       }
-/* 105 */     }
-/* 106 */     if (serializefromobject_exprIsNull_0_0) {
-/* 107 */       throw new NullPointerException(((java.lang.String) references[3] /* errMsg */));
-/* 108 */     }
-/* 109 */     boolean serializefromobject_isNull_5 = true;
-/* 110 */     java.lang.String serializefromobject_value_5 = null;
-/* 111 */     if (!false) {
-/* 112 */       serializefromobject_isNull_5 = false;
-/* 113 */       if (!serializefromobject_isNull_5) {
-/* 114 */         Object serializefromobject_funcResult_1 = null;
-/* 115 */         serializefromobject_funcResult_1 = serializefromobject_expr_0_0.getSecond();
-/* 116 */         serializefromobject_value_5 = (java.lang.String) serializefromobject_funcResult_1;
-/* 117 */
-/* 118 */       }
-/* 119 */     }
-/* 120 */     deserializetoobject_mutableStateArray_0[1] = serializefromobject_value_5;
-/* 121 */
-/* 122 */     UTF8String serializefromobject_value_4 = null;
-/* 123 */     if (!false) {
-/* 124 */       serializefromobject_value_4 = org.apache.spark.unsafe.types.UTF8String.fromString(deserializetoobject_mutableStateArray_0[1]);
-/* 125 */     }
-/* 126 */     deserializetoobject_mutableStateArray_2[4].reset();
-/* 127 */
-/* 128 */     deserializetoobject_mutableStateArray_2[4].zeroOutNullBytes();
-/* 129 */
-/* 130 */     deserializetoobject_mutableStateArray_2[4].write(0, serializefromobject_value_1);
-/* 131 */
-/* 132 */     deserializetoobject_mutableStateArray_2[4].write(1, serializefromobject_value_4);
-/* 133 */     append((deserializetoobject_mutableStateArray_2[4].getRow()));
-/* 134 */
-/* 135 */   }
-/* 136 */
-/* 137 */   protected void processNext() throws java.io.IOException {
-/* 138 */     while ( localtablescan_input_0.hasNext()) {
-/* 139 */       InternalRow localtablescan_row_0 = (InternalRow) localtablescan_input_0.next();
-/* 140 */       ((org.apache.spark.sql.execution.metric.SQLMetric) references[0] /* numOutputRows */).add(1);
-/* 141 */       UTF8String localtablescan_value_0 = localtablescan_row_0.getUTF8String(0);
-/* 142 */       int localtablescan_value_1 = localtablescan_row_0.getInt(1);
-/* 143 */
-/* 144 */       deserializetoobject_doConsume_0(localtablescan_row_0, localtablescan_value_0, localtablescan_value_1);
-/* 145 */       if (shouldStop()) return;
-/* 146 */     }
-/* 147 */   }
-/* 148 */
-/* 149 */ }
-```
-
-</CodeSurfer>
-
----
-
-<CodeSurfer>
-
-
-```java
-import kotlin.Pair;
-import org.apache.spark.api.java.function.MapFunction;
-import org.apache.spark.sql.catalyst.InternalRow;
-import org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter;
-import org.apache.spark.sql.execution.BufferedRowIterator;
-import org.apache.spark.sql.execution.metric.SQLMetric;
-import org.apache.spark.unsafe.Platform;
-import org.apache.spark.unsafe.types.UTF8String;
-import scala.collection.Iterator;
-
-import java.io.IOException;
-
-public Object generate(Object[]references){return new GeneratedIteratorForCodegenStage1(references);}
-
-// codegenStageId=1
-final class GeneratedIteratorForCodegenStage1 extends BufferedRowIterator {
-    private Object[] references;
-    private Iterator[] inputs;
-    private Iterator localtablescan_input_0;
-    private int deserializetoobject_argValue_0;
-    private String[] deserializetoobject_mutableStateArray_0 = new String[2];
-    private UnsafeRowWriter[] deserializetoobject_mutableStateArray_2 = new UnsafeRowWriter[5];
-    private Integer[] deserializetoobject_mutableStateArray_1 = new Integer[1];
-    private Pair[] mapelements_mutableStateArray_0 = new Pair[1];
-
-    public GeneratedIteratorForCodegenStage1(Object[] references) {
-        this.references = references;
-    }
-
-    public void init(int index, Iterator[] inputs) {
-        partitionIndex = index;
-        this.inputs = inputs;
-        localtablescan_input_0 = inputs[0];
-
-        deserializetoobject_mutableStateArray_2[0] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[1] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[2] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[3] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[4] = new UnsafeRowWriter(2, 32);
-
-    }
-
-    private void mapelements_doConsume_0(Pair mapelements_expr_0_0, boolean mapelements_exprIsNull_0_0) throws IOException {
-        boolean mapelements_isNull_1 = true;
-        Pair mapelements_value_1 = null;
-        if (!false) {
-            mapelements_mutableStateArray_0[0] = mapelements_expr_0_0;
-
-            mapelements_isNull_1 = false;
-            if (!mapelements_isNull_1) {
-                Object mapelements_funcResult_0 = null;
-
-                try {
-                    mapelements_funcResult_0 = ((MapFunction) references[1] /* literal */).call(mapelements_mutableStateArray_0[0]);
-                } catch (Exception e) {
-                    Platform.throwException(e);
-                }
-
-                if (mapelements_funcResult_0 != null) {
-                    mapelements_value_1 = (Pair) mapelements_funcResult_0;
-                } else {
-                    mapelements_isNull_1 = true;
-                }
-
-            }
-        }
-
-        serializefromobject_doConsume_0(mapelements_value_1, mapelements_isNull_1);
-
-    }
-
-    private void deserializetoobject_doConsume_0(InternalRow localtablescan_row_0,
-                                                 UTF8String deserializetoobject_expr_0_0,
-                                                 int deserializetoobject_expr_1_0) throws IOException {
-        boolean deserializetoobject_isNull_1 = true;
-        String deserializetoobject_value_1 = null;
-        if (!false) {
-            deserializetoobject_isNull_1 = false;
-            if (!deserializetoobject_isNull_1) {
-                Object deserializetoobject_funcResult_0 = null;
-                deserializetoobject_funcResult_0 = deserializetoobject_expr_0_0.toString();
-                deserializetoobject_value_1 = (String) deserializetoobject_funcResult_0;
-
-            }
-        }
-        deserializetoobject_mutableStateArray_0[0] = deserializetoobject_value_1;
-
-        deserializetoobject_argValue_0 = deserializetoobject_expr_1_0;
-
-        Integer deserializetoobject_value_3 = null;
-        if (!false) {
-            deserializetoobject_value_3 = Integer.valueOf(deserializetoobject_argValue_0);
-        }
-        deserializetoobject_mutableStateArray_1[0] = deserializetoobject_value_3;
-
-        final Pair deserializetoobject_value_0 = false ?
-                null : new Pair(deserializetoobject_mutableStateArray_0[0], deserializetoobject_mutableStateArray_1[0]);
-
-        mapelements_doConsume_0(deserializetoobject_value_0, false);
-
-    }
-
-    private void serializefromobject_doConsume_0(Pair serializefromobject_expr_0_0,
-                                                 boolean serializefromobject_exprIsNull_0_0) throws IOException {
-        if (serializefromobject_exprIsNull_0_0) {
-            throw new NullPointerException(((String) references[2] /* errMsg */));
-        }
-        boolean serializefromobject_isNull_1 = true;
-        int serializefromobject_value_1 = -1;
-        if (!false) {
-            serializefromobject_isNull_1 = false;
-            if (!serializefromobject_isNull_1) {
-                Object serializefromobject_funcResult_0 = null;
-                serializefromobject_funcResult_0 = serializefromobject_expr_0_0.getFirst();
-                serializefromobject_value_1 = (Integer) serializefromobject_funcResult_0;
-
-            }
-        }
-        if (serializefromobject_exprIsNull_0_0) {
-            throw new NullPointerException(((String) references[3] /* errMsg */));
-        }
-        boolean serializefromobject_isNull_5 = true;
-        String serializefromobject_value_5 = null;
-        if (!false) {
-            serializefromobject_isNull_5 = false;
-            if (!serializefromobject_isNull_5) {
-                Object serializefromobject_funcResult_1 = null;
-                serializefromobject_funcResult_1 = serializefromobject_expr_0_0.getSecond();
-                serializefromobject_value_5 = (String) serializefromobject_funcResult_1;
-
-            }
-        }
-        deserializetoobject_mutableStateArray_0[1] = serializefromobject_value_5;
-
-        UTF8String serializefromobject_value_4 = null;
-        if (!false) {
-            serializefromobject_value_4 = UTF8String.fromString(deserializetoobject_mutableStateArray_0[1]);
-        }
-        deserializetoobject_mutableStateArray_2[4].reset();
-
-        deserializetoobject_mutableStateArray_2[4].zeroOutNullBytes();
-
-        deserializetoobject_mutableStateArray_2[4].write(0, serializefromobject_value_1);
-
-        deserializetoobject_mutableStateArray_2[4].write(1, serializefromobject_value_4);
-        append((deserializetoobject_mutableStateArray_2[4].getRow()));
-
-    }
-
-    protected void processNext() throws IOException {
-        while (localtablescan_input_0.hasNext()) {
-            InternalRow localtablescan_row_0 = (InternalRow) localtablescan_input_0.next();
-            ((SQLMetric) references[0] /* numOutputRows */).add(1);
-            UTF8String localtablescan_value_0 = localtablescan_row_0.getUTF8String(0);
-            int localtablescan_value_1 = localtablescan_row_0.getInt(1);
-
-            deserializetoobject_doConsume_0(localtablescan_row_0, localtablescan_value_0, localtablescan_value_1);
-            if (shouldStop()) return;
-        }
-    }
-
-}
-```
-
-```java 1
-public Object generate(Object[]references){return new GeneratedIteratorForCodegenStage1(references);}
-
-// codegenStageId=1
-final class GeneratedIteratorForCodegenStage1 extends BufferedRowIterator {
-    private Object[] references;
-    private Iterator[] inputs;
-    private Iterator localtablescan_input_0;
-    private int deserializetoobject_argValue_0;
-    private String[] deserializetoobject_mutableStateArray_0 = new String[2];
-    private UnsafeRowWriter[] deserializetoobject_mutableStateArray_2 = new UnsafeRowWriter[5];
-    private Integer[] deserializetoobject_mutableStateArray_1 = new Integer[1];
-    private Pair[] mapelements_mutableStateArray_0 = new Pair[1];
-
-    public GeneratedIteratorForCodegenStage1(Object[] references) {
-        this.references = references;
-    }
-
-    public void init(int index, Iterator[] inputs) {
-        partitionIndex = index;
-        this.inputs = inputs;
-        localtablescan_input_0 = inputs[0];
-
-        deserializetoobject_mutableStateArray_2[0] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[1] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[2] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[3] = new UnsafeRowWriter(1, 32);
-        deserializetoobject_mutableStateArray_2[4] = new UnsafeRowWriter(2, 32);
-
-    }
-
-    private void mapelements_doConsume_0(Pair mapelements_expr_0_0, boolean mapelements_exprIsNull_0_0) throws IOException {
-        boolean mapelements_isNull_1 = true;
-        Pair mapelements_value_1 = null;
-        if (!false) {
-            mapelements_mutableStateArray_0[0] = mapelements_expr_0_0;
-
-            mapelements_isNull_1 = false;
-            if (!mapelements_isNull_1) {
-                Object mapelements_funcResult_0 = null;
-
-                try {
-                    mapelements_funcResult_0 = ((MapFunction) references[1] /* literal */).call(mapelements_mutableStateArray_0[0]);
-                } catch (Exception e) {
-                    Platform.throwException(e);
-                }
-
-                if (mapelements_funcResult_0 != null) {
-                    mapelements_value_1 = (Pair) mapelements_funcResult_0;
-                } else {
-                    mapelements_isNull_1 = true;
-                }
-
-            }
-        }
-
-        serializefromobject_doConsume_0(mapelements_value_1, mapelements_isNull_1);
-
-    }
-
-    private void deserializetoobject_doConsume_0(InternalRow localtablescan_row_0,
-                                                 UTF8String deserializetoobject_expr_0_0,
-                                                 int deserializetoobject_expr_1_0) throws IOException {
-        boolean deserializetoobject_isNull_1 = true;
-        String deserializetoobject_value_1 = null;
-        if (!false) {
-            deserializetoobject_isNull_1 = false;
-            if (!deserializetoobject_isNull_1) {
-                Object deserializetoobject_funcResult_0 = null;
-                deserializetoobject_funcResult_0 = deserializetoobject_expr_0_0.toString();
-                deserializetoobject_value_1 = (String) deserializetoobject_funcResult_0;
-
-            }
-        }
-        deserializetoobject_mutableStateArray_0[0] = deserializetoobject_value_1;
-
-        deserializetoobject_argValue_0 = deserializetoobject_expr_1_0;
-
-        Integer deserializetoobject_value_3 = null;
-        if (!false) {
-            deserializetoobject_value_3 = Integer.valueOf(deserializetoobject_argValue_0);
-        }
-        deserializetoobject_mutableStateArray_1[0] = deserializetoobject_value_3;
-
-        final Pair deserializetoobject_value_0 = false ?
-                null : new Pair(deserializetoobject_mutableStateArray_0[0], deserializetoobject_mutableStateArray_1[0]);
-
-        mapelements_doConsume_0(deserializetoobject_value_0, false);
-
-    }
-
-    private void serializefromobject_doConsume_0(Pair serializefromobject_expr_0_0,
-                                                 boolean serializefromobject_exprIsNull_0_0) throws IOException {
-        if (serializefromobject_exprIsNull_0_0) {
-            throw new NullPointerException(((String) references[2] /* errMsg */));
-        }
-        boolean serializefromobject_isNull_1 = true;
-        int serializefromobject_value_1 = -1;
-        if (!false) {
-            serializefromobject_isNull_1 = false;
-            if (!serializefromobject_isNull_1) {
-                Object serializefromobject_funcResult_0 = null;
-                serializefromobject_funcResult_0 = serializefromobject_expr_0_0.getFirst();
-                serializefromobject_value_1 = (Integer) serializefromobject_funcResult_0;
-
-            }
-        }
-        if (serializefromobject_exprIsNull_0_0) {
-            throw new NullPointerException(((String) references[3] /* errMsg */));
-        }
-        boolean serializefromobject_isNull_5 = true;
-        String serializefromobject_value_5 = null;
-        if (!false) {
-            serializefromobject_isNull_5 = false;
-            if (!serializefromobject_isNull_5) {
-                Object serializefromobject_funcResult_1 = null;
-                serializefromobject_funcResult_1 = serializefromobject_expr_0_0.getSecond();
-                serializefromobject_value_5 = (String) serializefromobject_funcResult_1;
-
-            }
-        }
-        deserializetoobject_mutableStateArray_0[1] = serializefromobject_value_5;
-
-        UTF8String serializefromobject_value_4 = null;
-        if (!false) {
-            serializefromobject_value_4 = UTF8String.fromString(deserializetoobject_mutableStateArray_0[1]);
-        }
-        deserializetoobject_mutableStateArray_2[4].reset();
-
-        deserializetoobject_mutableStateArray_2[4].zeroOutNullBytes();
-
-        deserializetoobject_mutableStateArray_2[4].write(0, serializefromobject_value_1);
-
-        deserializetoobject_mutableStateArray_2[4].write(1, serializefromobject_value_4);
-        append((deserializetoobject_mutableStateArray_2[4].getRow()));
-
-    }
-
-    protected void processNext() throws IOException {
-        while (localtablescan_input_0.hasNext()) {
-            InternalRow localtablescan_row_0 = (InternalRow) localtablescan_input_0.next();
-            ((SQLMetric) references[0] /* numOutputRows */).add(1);
-            UTF8String localtablescan_value_0 = localtablescan_row_0.getUTF8String(0);
-            int localtablescan_value_1 = localtablescan_row_0.getInt(1);
-
-            deserializetoobject_doConsume_0(localtablescan_row_0, localtablescan_value_0, localtablescan_value_1);
-            if (shouldStop()) return;
-        }
-    }
-
-}
-```
-
-```java 135:145 file=./snippets/1.java
-```
-
-```java 57:86 file=./snippets/1.java
-```
-
-```java 28:53 file=./snippets/1.java
-```
-
-```java 88:132 file=./snippets/1.java
-```
-
-```java 124:131 file=./snippets/1.java
-```
-
-</CodeSurfer>
-
----
-
-# Всё ещё непонятно
-
-- Код генерируется
-- Цикл бегает
-- Что-то кудато добавляется
-
----
-
-<CodeSurfer>
-
-```kotlin
-    withSpark(
-        master = "local[4]",
-    ) {
+fun main() {
+    withSpark {
         dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
             "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
             .map { it.second - 1 to it.first }
@@ -736,13 +106,66 @@ final class GeneratedIteratorForCodegenStage1 extends BufferedRowIterator {
             .debugCodegen()
             .show()
     }
+}
 ```
 
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```java file=./snippets/generated-with-comments.java title="What a mess"
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+
+```java file=./snippets/generated-cleared.java
+```
+
+```diff 13
+```
+
+```diff 30:41
+```
+
+```diff 43:53
+```
+
+```diff 55:84
+```
+
+```diff 87:114
+```
+
+```diff 116:160
+```
+
+```diff 152:159
+```
+
+</CodeSurfer>
+
+---
+
+# Still not clear
+
+- Code is generated
+- There is a cycle inside this code
+- Something is being written somewhere
+
+---
+
+<CodeSurfer>
+
 ```kotlin
-    withSpark(
-        master = "local[4]",
-        props = mapOf("spark.sql.codegen.comments" to true)
-    ) {
+fun main() {
+    withSpark {
         dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
             "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
             .map { it.second - 1 to it.first }
@@ -750,150 +173,86 @@ final class GeneratedIteratorForCodegenStage1 extends BufferedRowIterator {
             .debugCodegen()
             .show()
     }
+}
 ```
 
-```java file=./2.java
-```
-
-```java 150:156 file=./2.java
-```
-
-```java 156 file=./2.java
-```
-
-```java 155 file=./2.java
-```
-
-```java 153:154 file=./2.java
-```
-
-```java 150:152 file=./2.java
-```
-
-```java 160:162 file=./2.java
-```
-
-```java 163:164 file=./2.java
-```
-
-```java 166 file=./2.java
-```
-
-```java 62:67 file=./2.java
-```
-
-```java 68:80 file=./2.java
-```
-
-```java 82:89 file=./2.java
-```
-
-```java 91:92 file=./2.java
-```
-
-```java 94 file=./2.java
-```
-
-```java 29:32 file=./2.java
-```
-
-```java 28[41:67],36 file=./2.java
-```
-
-```java 36,43,44 file=./2.java
-```
-
-```java 50,58 file=./2.java
-```
-
-```java 100 file=./2.java
-```
-
-```java 98[49:83],101,111,112 file=./2.java
-```
-
-```java 116,117,127,128 file=./2.java
-```
-
-```java 134:137 file=./2.java
-```
-
-```java 136,144 file=./2.java
-```
-
-```java
-  public static void copyMemory(
-    Object src, long srcOffset, Object dst, long dstOffset, long length) {
-    // Check if dstOffset is before or after srcOffset to determine if we should copy
-    // forward or backwards. This is necessary in case src and dst overlap.
-    if (dstOffset < srcOffset) {
-      while (length > 0) {
-        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
-        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
-        length -= size;
-        srcOffset += size;
-        dstOffset += size;
-      }
-    } else {
-      srcOffset += length;
-      dstOffset += length;
-      while (length > 0) {
-        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
-        srcOffset -= size;
-        dstOffset -= size;
-        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
-        length -= size;
-      }
-
+```kotlin
+fun main() {
+    withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
+        dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
+            "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
+            .map { it.second - 1 to it.first }
+            .sort { arrayOf(it.col("first").desc()) }
+            .debugCodegen()
+            .show()
     }
-  }
-```
-
-```java 8 title="sun.misc.Unsafe O_o"
-  public static void copyMemory(
-    Object src, long srcOffset, Object dst, long dstOffset, long length) {
-    // Check if dstOffset is before or after srcOffset to determine if we should copy
-    // forward or backwards. This is necessary in case src and dst overlap.
-    if (dstOffset < srcOffset) {
-      while (length > 0) {
-        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
-        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
-        length -= size;
-        srcOffset += size;
-        dstOffset += size;
-      }
-    } else {
-      srcOffset += length;
-      dstOffset += length;
-      while (length > 0) {
-        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
-        srcOffset -= size;
-        dstOffset -= size;
-        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
-        length -= size;
-      }
-
-    }
-  }
+}
 ```
 
 </CodeSurfer>
 
 ---
 
-# Почему мы закончили на `_UNSAFE`?
+<CodeSurfer>
 
-Потому что впереди ещё сортировка
+```java file=./snippets/2.java
+```
+
+```diff 29:35
+```
+
+</CodeSurfer>
 
 ---
 
-# Почему мы закончили на `_UNSAFE`?
+<CodeSurfer>
 
-Потому что впереди ещё сортировка
+```java
+public static void copyMemory(
+    Object src, long srcOffset, Object dst, long dstOffset, long length) {
+    // Check if dstOffset is before or after srcOffset to determine if we should copy
+    // forward or backwards. This is necessary in case src and dst overlap.
+    if (dstOffset < srcOffset) {
+        while (length > 0) {
+            long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
+            _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
+            length -= size;
+            srcOffset += size;
+            dstOffset += size;
+        }
+    } else {
+        srcOffset += length;
+        dstOffset += length;
+        while (length > 0) {
+        long size = Math.min(length, UNSAFE_COPY_THRESHOLD);
+        srcOffset -= size;
+        dstOffset -= size;
+        _UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, size);
+        length -= size;
+    }
+}
+```
 
-Но я вам её не покажу
+```diff 8 title="sun.misc.Unsafe O_o"
+```
 
-Пора понять как мы к этим сгенерированным исходникам приходим
+</CodeSurfer>
+
+---
+
+# Why did we stop on `_UNSAFE`?
+
+Because there is a sorting ahead
+
+---
+
+# Why did we stop on `_UNSAFE`?
+
+Because there is a sorting ahead
+
+But I'm not going to show it to you
+
+Let's undestand how we come to this sources
 
 ---
 
@@ -908,39 +267,45 @@ dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
     .show()
 ```
 
-```kotlin 1[1:4]
-dsOf("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6,
-    "g" to 7, "h" to 8, "i" to 9, "j" to 10, "k" to 11, "l" to 12, "m" to 13)
-    .map { it.second - 1 to it.first }
-    .sort { arrayOf(it.col("first").desc()) }
-    .debugCodegen()
-    .show()
+```diff 1[1:4]
 ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
 
 ```kotlin
 inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
     createDataset(listOf(*t), encoder<T>())
 ```
 
-```kotlin 2[31:42]
-inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
-    createDataset(listOf(*t), encoder<T>())
+```diff 2[31:42]
 ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
 
 ```kotlin
 @OptIn(ExperimentalStdlibApi::class)
 inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::class)
 ```
 
-```kotlin 1,2[64:74] subtitle="Аналог ParametryzedTypeReferense в compile-time"
-@OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::class)
+```diff 1,2[64:74] subtitle="Jackson's ParametryzedTypeReferense in compile-time"
 ```
 
-```kotlin 2[48:85] subtitle="encoder → generateEncoder"
-@OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::class)
+```diff 2[48:85] subtitle="encoder → generateEncoder"
 ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
 
 ```kotlin 4[53:72]
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
@@ -952,7 +317,13 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
 }
 ```
 
-```kotlin title="Мемоизация на коленке"
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```kotlin title="Memoisation on your knee"
 class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
     private val values = ConcurrentHashMap<T, R>()
     override fun invoke(x: T) =
@@ -964,175 +335,70 @@ private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
 private val memoizedSchema = { x: KType -> schema(x) }.memoize()
 ```
 
-```kotlin title="Мемоизация на коленке" subtitle="Мне сказали что это сложно, так что давайте разбираться"
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff title="Memoisation on your knee" subtitle="I was tald it's complex, so let's dive into it"
 ```
 
-```kotlin 1:5
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 1:5 title="Cache"
 ```
 
-```kotlin 1[16:26] subtitle="Java PECS → Kotlin PICO"
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 1[16:26] title="Cache" subtitle="Java PECS → Kotlin PICO"
 ```
 
-```kotlin 1[48:55]
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 1[48:55]
 ```
 
-```kotlin 1[29:43]
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 1[29:43]
 ```
 
-```kotlin 2
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 2
 ```
 
-```kotlin 3[18:29]
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 3[18:29]
 ```
 
-```kotlin 3,4
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 3,4
 ```
 
-```kotlin 4[16:36]
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 4[16:36]
 ```
 
-```kotlin 1[29:43],3[25:28],4[28:35]
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 1[29:43],3[25:28],4[28:35]
 ```
 
-```kotlin 7
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 7
 ```
 
-```kotlin 9 subtitle="Поле функционального типа (T) -> R"
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 9 subtitle="Field of functional type (T) -> R"
 ```
 
-```kotlin 9[44:52] subtitle="schema?"
-class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
-    private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
-}
-
-private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
-
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+```diff 9[44:52] subtitle="schema?"
 ```
 
-```kotlin 2 file=./schema.kt
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```kotlin 2 file=./snippets/schema.kt
 ```
 
-```kotlin 2[25:57] file=./schema.kt subtitle="Pair<A, B> → Pair<String, Int>"
+```diff 2[25:57] subtitle="Pair<A, B> → Pair<String, Int>"
 ```
 
-```kotlin 2[61:68] file=./schema.kt subtitle="Pair<A, B> → Pair<String, Int>"
+```diff 2[61:68] subtitle="Pair<A, B> → Pair<String, Int>"
 ```
 
-```kotlin 3:6 file=./schema.kt
+```diff 3:6
 ```
 
-```kotlin
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```kotlin title="Known types"
 private val knownDataTypes = mapOf(
     Byte::class to DataTypes.ByteType,
     Short::class to DataTypes.ShortType,
@@ -1149,75 +415,99 @@ private val knownDataTypes = mapOf(
 )
 ```
 
+</CodeSurfer>
 
-```kotlin 7 file=./schema.kt
+---
+
+<CodeSurfer>
+
+
+```kotlin 7 file=./snippets/schema.kt
 ```
 
-```kotlin 9 file=./schema.kt
+```diff 9
 ```
 
-```kotlin 11[38:67] file=./schema.kt subtitle="List<Pair<KTypeParameter, KTypeProjection>>"
+```diff 11[38:67] subtitle="List<Pair<KTypeParameter, KTypeProjection>>"
 ```
 
-```kotlin 12 file=./schema.kt subtitle="\"A\" to String"
+```diff 12 subtitle="\"A\" to String"
 ```
 
-```kotlin 2[25:57],11:13 file=./schema.kt subtitle="Merge types with previous iteration"
+```diff 2[25:57],11:13 subtitle="Merge types with previous iteration"
 ```
 
-```kotlin 15:17 file=./schema.kt
+```diff 15:17
 ```
 
-```kotlin 18:36 file=./schema.kt
+```diff 18:36
 ```
 
-```kotlin 19[17:25] file=./schema.kt
+```diff 19[17:25]
 ```
 
-```kotlin 19[29:53],20:29 file=./schema.kt
+```diff 19[29:53],20:29
 ```
 
-```kotlin 30[15:63] file=./schema.kt
+```diff 30[15:63]
 ```
 
-```kotlin 31:35 file=./schema.kt
+```diff 31:35
 ```
 
-```kotlin 37:49 file=./schema.kt
+```diff 37:49
 ```
 
-```kotlin 50:74 file=./schema.kt
+```diff 50:74
 ```
 
-```kotlin 52:53 file=./schema.kt
+```diff 52:53
 ```
 
-```kotlin 54:55 file=./schema.kt
+```diff 54:55
 ```
 
-```kotlin 57 file=./schema.kt
+```diff 57
 ```
 
-```kotlin 58:64 file=./schema.kt
+```diff 58:64
 ```
 
-```kotlin 66:69 file=./schema.kt
+```diff 66:69
 ```
 
-```kotlin 65:69 file=./schema.kt
+```diff 65:69
 ```
 
-```kotlin 73 file=./schema.kt
+```diff 73
 ```
 
-```kotlin 75:94 file=./schema.kt
+```diff 75:94
 ```
 
-```scala file=./helpers.scala title="Стройная система костылей"
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/helpers.scala
 ```
 
-```kotlin 2[61:68] file=./schema.kt
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```kotlin 2[61:68] file=./snippets/schema.kt
 ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
 
 ```kotlin
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
@@ -1229,136 +519,69 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
 }
 ```
 
-```kotlin 4[34:78]
-fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
-    @Suppress("UNCHECKED_CAST")
-    return when {
-        isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
-        else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
-    } as Encoder<T>
-}
+```diff 4[34:78]
 ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
 
 ```kotlin
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
-        if (schema is DataTypeWithClass) 
+        if (schema is DataTypeWithClass)
             KotlinReflection.serializerFor(kClass.java, schema)
         else
             KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.deserializerFor(kClass.java, schema) 
-        else 
+        if (schema is DataTypeWithClass)
+            KotlinReflection.deserializerFor(kClass.java, schema)
+        else
             KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
         ClassTag.apply(kClass.java)
     )
 }
 ```
 
-```kotlin 2
-private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
-    return ExpressionEncoder(
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.serializerFor(kClass.java, schema)
-        else
-            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.deserializerFor(kClass.java, schema) 
-        else 
-            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
-        ClassTag.apply(kClass.java)
-    )
-}
+```diff 2
 ```
 
-```kotlin 3,4
-private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
-    return ExpressionEncoder(
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.serializerFor(kClass.java, schema)
-        else
-            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.deserializerFor(kClass.java, schema) 
-        else 
-            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
-        ClassTag.apply(kClass.java)
-    )
-}
+```diff 3,4
 ```
 
-```kotlin 5,6
-private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
-    return ExpressionEncoder(
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.serializerFor(kClass.java, schema)
-        else
-            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.deserializerFor(kClass.java, schema) 
-        else 
-            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
-        ClassTag.apply(kClass.java)
-    )
-}
+```diff 5,6
 ```
 
-```kotlin 7:10
-private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
-    return ExpressionEncoder(
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.serializerFor(kClass.java, schema)
-        else
-            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.deserializerFor(kClass.java, schema) 
-        else 
-            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
-        ClassTag.apply(kClass.java)
-    )
-}
+```diff 7:10
 ```
 
-```kotlin 11
-private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
-    return ExpressionEncoder(
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.serializerFor(kClass.java, schema)
-        else
-            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.deserializerFor(kClass.java, schema) 
-        else 
-            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
-        ClassTag.apply(kClass.java)
-    )
-}
+```diff 11
 ```
 
-```kotlin 2[12:28]
-private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
-    return ExpressionEncoder(
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.serializerFor(kClass.java, schema)
-        else
-            KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) 
-            KotlinReflection.deserializerFor(kClass.java, schema) 
-        else 
-            KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
-        ClassTag.apply(kClass.java)
-    )
-}
+```diff 2[12:28]
 ```
 
-```scala file=./serializerFor.scala
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/serializerFor.scala
 ```
 
-```scala 1 file=./serializerFor.scala
+```diff 1
 ```
 
-```scala 1[68:77] file=./serializerFor.scala subtitle="It's called expression, but really it may be the giant code block"
+```diff 1[68:77] subtitle="It's called expression, but really it may be the giant code block"
 ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
 
 ```scala title="The most important method"
   /**
@@ -1373,32 +596,50 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
   }
 ```
 
-```scala 2 file=./serializerFor.scala subtitle="Obtain Scala type from Java class"
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala 2 file=./snippets/serializerFor.scala subtitle="Obtain Scala type from Java class"
 ```
 
-```scala 3 file=./serializerFor.scala subtitle="Obtain class name"
+```diff 3 subtitle="Obtain class name"
 ```
 
-```scala 4 file=./serializerFor.scala subtitle="Walked typed path is used for exceptions to determine what's going wrong"
+```diff 4 subtitle="Walked typed path is used for exceptions to determine what's going wrong"
 ```
 
-```scala 6 file=./serializerFor.scala subtitle="Calling recursive serializer creation"
+```diff 6 subtitle="Calling recursive serializer creation"
 ```
 
-```scala 6[53:75] file=./serializerFor.scala subtitle="Supplying our predefined schema"
+```diff 6[53:75] subtitle="Supplying our predefined schema"
 ```
 
-```scala file=./serializerFor2.scala subtitle="316-line-height"
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/serializerFor2.scala subtitle="316-line-height"
 ```
 
-```scala 1:7 file=./serializerFor2.scala
+```scala 1:7 file=./snippets/serializerFor2.scala
 ```
 
-```scala 58:59 file=./serializerFor2.scala subtitle="simple input object"
+```scala 58:59 file=./snippets/serializerFor2.scala subtitle="simple input object"
 ```
 
-```scala 111:112 file=./serializerFor2.scala subtitle="string"
+```scala 111:112 file=./snippets/serializerFor2.scala subtitle="string"
 ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
 
 ```scala
 def createSerializerForString(inputObject: Expression): Expression = {
@@ -1411,10 +652,188 @@ def createSerializerForString(inputObject: Expression): Expression = {
 }
 ```
 
-```scala 113:118 file=./serializerFor2.scala subtitle="string"
+```scala 113:118 file=./snippets/serializerFor2.scala subtitle="string"
 ```
 
 </CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/create.scala
+```
+
+```diff 4 subtitle="A context for codegen, tracking a list of objects that could be passed into generated Java function."
+```
+
+```diff 5 subtitle="Will call genCode eventually"
+```
+
+```diff 7:39
+```
+
+```diff 16
+```
+
+```diff 20
+```
+
+```diff 24
+```
+
+```diff 32:35
+```
+
+```diff 5
+```
+
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/createCode.scala
+```
+
+```diff 5
+```
+
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/generateExpressions.scala
+```
+
+```diff 9
+```
+
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/subExpressionElimination.scala
+```
+
+```diff 2:4 subtitle="Surprisingly well-documented method"
+```
+
+```diff 2:4 subtitle="Find common subtrees and extract them to separate functions"
+```
+
+```diff 7,8
+```
+
+```diff 10:12
+```
+
+```diff 19:28
+```
+
+```diff 30:42
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/generateExpressions.scala
+```
+
+```diff 10
+```
+
+```diff 10[24:38] subtitle="Those famous method"
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala file=./snippets/genCode.scala title="This famous method"
+```
+
+```diff 3:5 subtitle="When subject of code eliination"
+```
+
+```diff 7,8 subtitle="Generating names"
+```
+
+```diff 9:11 subtitle="Internal gen code"
+```
+
+```diff 12 subtitle="Split into several private methods if generated method is too big"
+```
+
+```diff 15 subtitle="Add useful comment"
+```
+
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```scala 45 file=./snippets/create.scala title="Back to create" subtitle="compile or obtain from cache"
+```
+
+</CodeSurfer>
+
+---
+
+# Note on Spark architecture
+
+<Image
+  src='https://d1jnx9ba8s6j9r.cloudfront.net/blog/wp-content/uploads/2018/09/Picture6-2.png'
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '70%',
+    height: '70%',
+  }}>
+</Image>
+
+---
+
+# Lifecycle
+
+<ul>
+    <li>Load application</li>
+    <Appear>
+    <li>Generate code</li>
+    <li>Pipe data through code</li>
+    <li>Write (shuffle) result</li>
+    </Appear>
+</ul>
+
+---
+
+# Summary
+
+<ol>
+    <li>Code generation is simple</li>
+    <Appear>
+    <li>Just call <code>toString()</code> recursively</li>
+    <li>Sometimes methods are big. Split them</li>
+    <li>Janino allows running scriptlets</li>
+    <li>Sometimes mutable state is fine</li>
+    </Appear>
+</ol>
 
 ---
 

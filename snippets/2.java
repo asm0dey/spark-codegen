@@ -25,38 +25,26 @@ final class GeneratedIteratorForCodegenStage1 extends org.apache.spark.sql.execu
 
     }
 
-    private void mapelements_doConsume_0(Pair mapelements_expr_0_0, boolean mapelements_exprIsNull_0_0) throws IOException {
-        // CONSUME: SerializeFromObject [assertnotnull(input[0, kotlin.Pair, true]).getFirst AS first#25, 
+    protected void processNext() throws IOException {
+        // PRODUCE: SerializeFromObject [assertnotnull(input[0, kotlin.Pair, true]).getFirst AS first#25, 
         //      staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringType, fromString, 
-        //          assertnotnull(input[0, kotlin.Pair, true]).getSecond, true, false) AS second#26]
-        // me.MainKt$inlined$sam$i$org_apache_spark_api_java_function_MapFunction$0@346a2799.call
-        boolean mapelements_isNull_1 = true;
-        Pair mapelements_value_1 = null;
-        if (!false) {
-            mapelements_mutableStateArray_0[0] = mapelements_expr_0_0;
+        //              assertnotnull(input[0, kotlin.Pair, true]).getSecond, true, false) AS second#26]
+        // PRODUCE: MapElements me.MainKt$inlined$sam$i$org_apache_spark_api_java_function_MapFunction$0@346a2799, 
+        //      obj#24: kotlin.Pair
+        // PRODUCE: DeserializeToObject newInstance(class kotlin.Pair), obj#23: kotlin.Pair
+        // PRODUCE: LocalTableScan [first#16, second#17]
+        while (localtablescan_input_0.hasNext()) {
+            InternalRow localtablescan_row_0 = (InternalRow) localtablescan_input_0.next();
+            ((org.apache.spark.sql.execution.metric.SQLMetric) references[0] /* numOutputRows */).add(1);
+            // CONSUME: DeserializeToObject newInstance(class kotlin.Pair), obj#23: kotlin.Pair
+            // input[0, string, false]
+            UTF8String localtablescan_value_0 = localtablescan_row_0.getUTF8String(0);
+            // input[1, int, false]
+            int localtablescan_value_1 = localtablescan_row_0.getInt(1);
 
-            mapelements_isNull_1 = false;
-            if (!mapelements_isNull_1) {
-                Object mapelements_funcResult_0 = null;
-
-                try {
-                    mapelements_funcResult_0 = ((MapFunction) references[1] /* literal */)
-                            .call(mapelements_mutableStateArray_0[0]);
-                } catch (Exception e) {
-                    org.apache.spark.unsafe.Platform.throwException(e);
-                }
-
-                if (mapelements_funcResult_0 != null) {
-                    mapelements_value_1 = (Pair) mapelements_funcResult_0;
-                } else {
-                    mapelements_isNull_1 = true;
-                }
-
-            }
+            deserializetoobject_doConsume_0(localtablescan_row_0, localtablescan_value_0, localtablescan_value_1);
+            if (shouldStop()) return;
         }
-
-        serializefromobject_doConsume_0(mapelements_value_1, mapelements_isNull_1);
-
     }
 
     private void deserializetoobject_doConsume_0(InternalRow localtablescan_row_0,
@@ -93,6 +81,38 @@ final class GeneratedIteratorForCodegenStage1 extends org.apache.spark.sql.execu
 
         mapelements_doConsume_0(deserializetoobject_value_0, false);
 
+    }
+
+    private void mapelements_doConsume_0(Pair mapelements_expr_0_0, boolean mapelements_exprIsNull_0_0) throws IOException {
+        // CONSUME: SerializeFromObject [assertnotnull(input[0, kotlin.Pair, true]).getFirst AS first#25, 
+        //      staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringType, fromString, 
+        //          assertnotnull(input[0, kotlin.Pair, true]).getSecond, true, false) AS second#26]
+        // me.MainKt$inlined$sam$i$org_apache_spark_api_java_function_MapFunction$0@346a2799.call
+        boolean mapelements_isNull_1 = true;
+        Pair mapelements_value_1 = null;
+        if (!false) {
+            mapelements_mutableStateArray_0[0] = mapelements_expr_0_0;
+
+            mapelements_isNull_1 = false;
+            if (!mapelements_isNull_1) {
+                Object mapelements_funcResult_0 = null;
+
+                try {
+                    mapelements_funcResult_0 = ((MapFunction) references[1] /* literal */)
+                            .call(mapelements_mutableStateArray_0[0]);
+                } catch (Exception e) {
+                    org.apache.spark.unsafe.Platform.throwException(e);
+                }
+
+                if (mapelements_funcResult_0 != null) {
+                    mapelements_value_1 = (Pair) mapelements_funcResult_0;
+                } else {
+                    mapelements_isNull_1 = true;
+                }
+
+            }
+        }
+        serializefromobject_doConsume_0(mapelements_value_1, mapelements_isNull_1);
     }
 
     private void serializefromobject_doConsume_0(Pair serializefromobject_expr_0_0,
@@ -143,29 +163,5 @@ final class GeneratedIteratorForCodegenStage1 extends org.apache.spark.sql.execu
 
         deserializetoobject_mutableStateArray_2[4].write(1, serializefromobject_value_4);
         append((deserializetoobject_mutableStateArray_2[4].getRow()));
-
     }
-
-    protected void processNext() throws IOException {
-        // PRODUCE: SerializeFromObject [assertnotnull(input[0, kotlin.Pair, true]).getFirst AS first#25, 
-        //      staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringType, fromString, 
-        //              assertnotnull(input[0, kotlin.Pair, true]).getSecond, true, false) AS second#26]
-        // PRODUCE: MapElements me.MainKt$inlined$sam$i$org_apache_spark_api_java_function_MapFunction$0@346a2799, 
-        //      obj#24: kotlin.Pair
-        // PRODUCE: DeserializeToObject newInstance(class kotlin.Pair), obj#23: kotlin.Pair
-        // PRODUCE: LocalTableScan [first#16, second#17]
-        while (localtablescan_input_0.hasNext()) {
-            InternalRow localtablescan_row_0 = (InternalRow) localtablescan_input_0.next();
-            ((org.apache.spark.sql.execution.metric.SQLMetric) references[0] /* numOutputRows */).add(1);
-            // CONSUME: DeserializeToObject newInstance(class kotlin.Pair), obj#23: kotlin.Pair
-            // input[0, string, false]
-            UTF8String localtablescan_value_0 = localtablescan_row_0.getUTF8String(0);
-            // input[1, int, false]
-            int localtablescan_value_1 = localtablescan_row_0.getInt(1);
-
-            deserializetoobject_doConsume_0(localtablescan_row_0, localtablescan_value_0, localtablescan_value_1);
-            if (shouldStop()) return;
-        }
-    }
-
 }

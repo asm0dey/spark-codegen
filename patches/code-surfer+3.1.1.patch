@@ -1,0 +1,13 @@
+diff --git a/node_modules/code-surfer/dist/standalone.esm.js b/node_modules/code-surfer/dist/standalone.esm.js
+index 65d4163..fed50db 100644
+--- a/node_modules/code-surfer/dist/standalone.esm.js
++++ b/node_modules/code-surfer/dist/standalone.esm.js
+@@ -135,7 +135,7 @@ function ErrorBox(_ref3) {
+       padding: "10px 30px",
+       maxWidth: "90vw",
+       margin: "0 auto",
+-      fontFamily: "monospace",
++      fontFamily: "'JetBrains Mono', Menlo, monospace",
+       fontSize: "1rem"
+     }
+   }, React.createElement("h3", null, header), React.createElement("p", null, body));
