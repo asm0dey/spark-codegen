@@ -3,16 +3,17 @@ import {
   CodeSurferColumns,
   Step,
 } from "code-surfer";
-import { vsDark } from "@code-surfer/themes"
+import { dracula } from "@code-surfer/themes"
 import "prismjs/components/prism-kotlin"
 import "prismjs/components/prism-java"
 import "prismjs/components/prism-scala"
 
 export const theme = (()=>{
-    vsDark.styles.CodeSurfer.code = {
+    let t = dracula
+    t.styles.CodeSurfer.code = {
         fontFamily: "'JetBrains Mono', Menlo, monospace",
     }
-    return vsDark
+    return t
 })();
 
 
@@ -24,9 +25,14 @@ Pasha Finkelshteyn, JetBrains
 
 ---
 
-# Hi
+# Hi, I'm Pasha
 
-## I'm Pasha
+<Appear>
+<span>And I'm author of Kotlin API for Apache Spark ™®©</span>
+<span>It was 5-minute challenge</span>
+<span>But</span>
+<span>Something went wrong</span>
+</Appear>
 
 
 ---
@@ -125,7 +131,7 @@ fun main() {
 <CodeSurfer>
 
 
-```java file=./snippets/generated-cleared.java
+```java file=./snippets/generated-cleared.java showNumbers
 ```
 
 ```diff 13
@@ -232,6 +238,9 @@ fun main() {
 ```
 
 ```diff 79,80
+```
+
+```diff 82
 ```
 
 ```diff 86[5:103]
