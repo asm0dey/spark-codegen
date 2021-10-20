@@ -175,16 +175,17 @@ private def serializerFor(
                 val structFields = dataType.dt.fields.map(_.asInstanceOf[KStructField])
                 val fields = structFields.map { structField =>
                     val maybeProp = properties.find(it => it.getReadMethod.getName == structField.getterName)
-                    if (maybeProp.isEmpty) throw new IllegalArgumentException(s"""Field ${structField.name} is not
-                    found among available props, which are: ${properties.map(_.getName).mkString(", ")}""")
+                    if (maybeProp.isEmpty) 
+                        throw new IllegalArgumentException(s"""Field ${structField.name} is not
+                            found among available props, which are: ${properties.map(_.getName).mkString(", ")}""")
                     val fieldName = structField.name
                     val propClass = structField.dataType.asInstanceOf[DataTypeWithClass].cls
                     val propDt = structField.dataType.asInstanceOf[DataTypeWithClass]
                     val fieldValue = Invoke(
-                    inputObject,
-                    maybeProp.get.getReadMethod.getName,
-                    inferExternalType(propClass),
-                    returnNullable = propDt.nullable
+                        inputObject,
+                        maybeProp.get.getReadMethod.getName,
+                        inferExternalType(propClass),
+                        returnNullable = propDt.nullable
                     )
                     val newPath = walkedTypePath.recordField(propClass.getName, fieldName)
                     (fieldName, 
