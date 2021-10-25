@@ -3,13 +3,14 @@ import {
   CodeSurferColumns,
   Step,
 } from "code-surfer";
-import { dracula } from "@code-surfer/themes"
+import { nightOwl } from "@code-surfer/themes"
 import "prismjs/components/prism-kotlin"
 import "prismjs/components/prism-java"
 import "prismjs/components/prism-scala"
+import { SplitRight } from 'mdx-deck'
 
 export const theme = (()=>{
-    let t = dracula
+    let t = nightOwl
     t.styles.CodeSurfer.code = {
         fontFamily: "'JetBrains Mono', Menlo, monospace",
     }
@@ -21,6 +22,8 @@ export const theme = (()=>{
 ## How High-level Pipelines Become Distributed Hardcore
 
 Pasha Finkelshteyn, JetBrains
+
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/asm0di0.svg?style=social&label=Follow%20%40asm0di0)](https://twitter.com/asm0di0)
 
 
 ---
@@ -37,10 +40,29 @@ Pasha Finkelshteyn, JetBrains
 
 ---
 
+<SplitRight>
+
+![](https://cdn.europosters.eu/image/1300/posters/rick-and-morty-watch-i50046.jpg)
+
+## Why 5 minutes?
+
+* Spark has Java API
+* Kotlin is compatible with Java
+* ????
+* Profit
+
+</SplitRight>
+
+---
+
+# This is the story of 
+# ???
+
+---
 
 <CodeSurfer >
 
-```kotlin file=./snippets/complex.kt title="Complex example"
+```kotlin file=./snippets/complex.kt title="Usually ETL jobs look like this"
 ```
 </CodeSurfer>
 
@@ -143,10 +165,19 @@ fun main() {
 ```diff 43:53
 ```
 
+```diff 50
+```
+
 ```diff 55:84
 ```
 
+```diff 82
+```
+
 ```diff 87:114
+```
+
+```diff 112
 ```
 
 ```diff 116:160
@@ -328,15 +359,10 @@ public static void copyMemory(
 
 Because there is a sorting ahead
 
----
-
-# Why did we stop on `_UNSAFE`?
-
-Because there is a sorting ahead
-
-But I'm not going to show it to you
-
-Let's undestand how we come to this sources
+<Appear>
+<p>I don't gonna show it to you</p>
+<p>We need to understand how did we get this code</p>
+</Appear>
 
 ---
 
@@ -992,3 +1018,13 @@ def createSerializerForObject(
 ---
 
 # The End
+
+---
+
+# Thank you!
+
+**Try Kotlin API for Apache Spark!**
+
+https://github.com/JetBrains/kotlin-spark-api
+
+Follow me on Twitter: [asm0di0](twitter.com/asm0di0)

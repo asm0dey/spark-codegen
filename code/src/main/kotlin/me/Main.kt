@@ -24,7 +24,7 @@ fun main() {
             }
             .sort { arrayOf(it.col("first").desc()) }
             .debugCodegen()
-            .show()
+            .schema()
     }
 }
 
