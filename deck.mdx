@@ -77,7 +77,7 @@ Pasha Finkelshteyn, JetBrains
 ```diff 2
 ```
 
-```diff 3:4
+```diff 3:4 subtitle="Dataset — table-like structure with column management"
 ```
 
 ```diff 5
@@ -163,6 +163,9 @@ fun main() {
 ```
 
 ```diff 43:53
+```
+
+```diff 51 subtitle="It stops!"
 ```
 
 ```diff 50
@@ -417,7 +420,7 @@ inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::c
 
 <CodeSurfer>
 
-```kotlin 4[53:72]
+```kotlin
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     @Suppress("UNCHECKED_CAST")
     return when {
@@ -425,6 +428,9 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
         else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
     } as Encoder<T>
 }
+```
+
+```diff 4[53:72]
 ```
 
 </CodeSurfer>
@@ -605,6 +611,32 @@ private val knownDataTypes = mapOf(
 ```
 
 </CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```kotlin
+fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
+    @Suppress("UNCHECKED_CAST")
+    return when {
+        isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
+        else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
+    } as Encoder<T>
+}
+```
+
+</CodeSurfer>
+
+---
+
+# Why do we memoize only schema?
+
+<Appear>
+
+<p>Because encoder is mutable!</p>
+
+</Appear>
 
 ---
 
